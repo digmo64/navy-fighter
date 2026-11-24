@@ -1,0 +1,23 @@
+[
+  {
+    "nombre": "Flota Estándar",
+    "descripcion": "Configuración equilibrada de 4 embarcaciones en tablero 8x8.",
+    "tamano_tablero": 8,
+    "barcos": [
+      { "tipo": "portaaviones", "cantidad": 1 },
+      { "tipo": "acorazado", "cantidad": 1 },
+      { "tipo": "submarino", "cantidad": 1 },
+      { "tipo": "destructor", "cantidad": 1 }
+    ]
+  },
+  {
+    "nombre": "Escaramuza Rápida",
+    "descripcion": "Partida ágil de 3 embarcaciones ideales para demostraciones.",
+    "tamano_tablero": 6,
+    "barcos": [
+      { "tipo": "acorazado", "cantidad": 1 },
+      { "tipo": "submarino", "cantidad": 1 },
+      { "tipo": "destructor", "cantidad": 1 }
+    ]
+  }
+]

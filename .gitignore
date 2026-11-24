@@ -1,0 +1,9 @@
+﻿venv/
+__pycache__/
+*.pyc
+*.pyo
+.vscode/
+data/*.db
+data/saves/*.pkl
+data/saves/*.json
+data/output/*.csv
