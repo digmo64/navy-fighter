@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <div class="flex-between">
+    <div>
+      <h2>Sala Táctica: <span id="sala-codigo">{{ codigo }}</span></h2>
+      <p id="estado-banner" class="badge">Cargando estado...</p>
+    </div>
+    <div>
+      <button class="btn-secondary" onclick="guardarPartida()">Serializar Partida</button>
+      <a href="/" class="btn-link">Volver al Lobby</a>
+    </div>
+  </div>
+</div>
+
+<div id="panel-despliegue" class="card mt-16" style="display: none;">
+  <div class="flex-between">
+    <div>
+      <h3>Fase de Despliegue de Flota</h3>
+      <p id="instruccion-despliegue">Haz clic en tu tablero para ubicar cada barco o usa el despliegue automático.</p>
+    </div>
+    <div>
+      <button class="btn-secondary" onclick="alternarOrientacion()">Orientación: <span id="orientacion-label">Horizontal (H)</span></button>
+      <button onclick="despliegueAleatorio()">Despliegue Aleatorio</button>
+      <button id="btn-confirmar-flota" onclick="confirmarDespliegueManual()" disabled>Confirmar Flota</button>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2 mt-16">
+  <section class="card">
+    <h3>Tu Flota</h3>
+    <div id="tablero-propio" class="board"></div>
+  </section>
+
+  <section class="card">
+    <h3>Radar Enemigo (Haz clic para disparar)</h3>
+    <div id="tablero-rival" class="board"></div>
+  </section>
+</div>
+
+<div class="card mt-16">
+  <h3>Bitácora de Combate</h3>
+  <ul id="bitacora-lista" class="lista-simple"></ul>
+</div>
+
+<script>
+  const CODIGO_SALA = "{{ codigo }}";
+  const JUGADOR_ID = Number("{{ jugador_id }}");
+</script>
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% endblock %}

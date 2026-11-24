@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid-2">
+  <section class="card">
+    <h2>1. Seleccionar o Crear Jugador</h2>
+    <div class="form-row">
+      <input type="text" id="nuevo-username" placeholder="Nombre del comandante">
+      <button onclick="crearJugador()">Registrar</button>
+    </div>
+    <label for="jugador-activo">Jugador activo en este navegador:</label>
+    <select id="jugador-activo">
+      {% for j in jugadores %}
+        <option value="{{ j.id }}">{{ j.username }} (Victorias: {{ j.victorias }})</option>
+      {% endfor %}
+    </select>
+    <div class="form-row mt-8">
+      <button class="btn-secondary" onclick="renombrarJugador()">Editar Nombre</button>
+      <button class="btn-danger" onclick="eliminarJugador()">Eliminar</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. Crear o Unirse a Sala Multijugador</h2>
+    <label for="flota-select">Plantilla de flota:</label>
+    <select id="flota-select">
+      {% for f in flotas %}
+        <option value="{{ f.id }}">{{ f.nombre }} ({{ f.tamano_tablero }}x{{ f.tamano_tablero }})</option>
+      {% endfor %}
+    </select>
+    <button class="mt-8 full-width" onclick="crearSala()">Crear Nueva Sala</button>
+
+    <hr>
+    <div class="form-row">
+      <input type="text" id="codigo-unirse" placeholder="Código de sala (ej. A1B2)" maxlength="4">
+      <button onclick="unirseSala()">Unirse</button>
+    </div>
+
+    {% if salas %}
+    <p class="mt-8"><strong>Salas abiertas:</strong></p>
+    <ul class="lista-simple">
+      {% for s in salas %}
+        <li>
+          <span>Sala <strong>{{ s.codigo }}</strong> ({{ s.estado }}) - {{ s.jugadores | join(' vs ') }}</span>
+          <button class="btn-small" onclick="entrarDirecto('{{ s.codigo }}')">Entrar</button>
+        </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+</div>
+
+<div class="grid-2 mt-16">
+  <section class="card">
+    <div class="flex-between">
+      <h2>Ranking de Comandantes</h2>
+      <button class="btn-secondary btn-small" onclick="exportarCSV()">Exportar CSV (Hilo)</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Jugador</th>
+          <th>Partidas</th>
+          <th>Victorias</th>
+          <th>Precisión</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for j in jugadores %}
+        <tr>
+          <td>{{ j.username }}</td>
+          <td>{{ j.partidas_jugadas }}</td>
+          <td>{{ j.victorias }}</td>
+          <td>{{ j.precision }}%</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">Aún no hay jugadores registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>CRUD Plantillas de Flota y Partidas Guardadas</h2>
+    <div class="form-row">
+      <input type="text" id="flota-nombre" placeholder="Nombre nueva flota">
+      <input type="number" id="flota-tamano" value="8" min="5" max="12" style="width: 70px;">
+      <button onclick="crearFlotaPersonalizada()">Guardar Flota</button>
+    </div>
+    <ul class="lista-simple mt-8">
+      {% for f in flotas %}
+      <li>
+        <span><strong>{{ f.nombre }}</strong> ({{ f.tamano_tablero }}x{{ f.tamano_tablero }})</span>
+        <button class="btn-danger btn-small" data-id="{{ f.id }}" onclick="eliminarFlota(this.dataset.id)">Borrar</button>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <hr>
+    <h3>Partidas Serializadas (.pkl / .json)</h3>
+    <ul class="lista-simple">
+      {% for g in guardadas %}
+      <li>
+        <span>Sala <strong>{{ g.codigo }}</strong> - {{ g.estado }}</span>
+        <button class="btn-small" onclick="reanudarPartida('{{ g.codigo }}')">Reanudar</button>
+      </li>
+      {% else %}
+      <li>No hay partidas guardadas en disco.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<script>
+async function crearJugador() {
+  const username = document.getElementById("nuevo-username").value;
+  const res = await fetch("/api/jugadores", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username })
+  });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  location.reload();
+}
+
+async function renombrarJugador() {
+  const id = document.getElementById("jugador-activo").value;
+  if (!id) return alert("Selecciona un jugador.");
+  const nuevo = prompt("Nuevo nombre para el comandante:");
+  if (!nuevo) return;
+  const res = await fetch(`/api/jugadores/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: nuevo })
+  });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  location.reload();
+}
+
+async function eliminarJugador() {
+  const id = document.getElementById("jugador-activo").value;
+  if (!id || !confirm("¿Eliminar jugador seleccionado?")) return;
+  const res = await fetch(`/api/jugadores/${id}`, { method: "DELETE" });
+  if (!res.ok) return alert("No se pudo eliminar (puede tener partidas asociadas).");
+  location.reload();
+}
+
+async function crearSala() {
+  const jugador_id = document.getElementById("jugador-activo").value;
+  const flota_id = document.getElementById("flota-select").value;
+  if (!jugador_id) return alert("Primero registra o selecciona un jugador.");
+  const res = await fetch("/api/salas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jugador_id, flota_id })
+  });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  window.location.href = `/sala/${data.codigo}?jugador_id=${jugador_id}`;
+}
+
+async function unirseSala(codigoParam) {
+  const jugador_id = document.getElementById("jugador-activo").value;
+  const codigo = codigoParam || document.getElementById("codigo-unirse").value.trim().toUpperCase();
+  if (!jugador_id || !codigo) return alert("Selecciona jugador e ingresa el código de sala.");
+  const res = await fetch(`/api/salas/${codigo}/unirse`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jugador_id })
+  });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  window.location.href = `/sala/${codigo}?jugador_id=${jugador_id}`;
+}
+
+function entrarDirecto(codigo) {
+  unirseSala(codigo);
+}
+
+async function crearFlotaPersonalizada() {
+  const nombre = document.getElementById("flota-nombre").value;
+  const tamano_tablero = document.getElementById("flota-tamano").value;
+  const barcos = [
+    { tipo: "acorazado", cantidad: 1 },
+    { tipo: "submarino", cantidad: 1 },
+    { tipo: "destructor", cantidad: 2 }
+  ];
+  const res = await fetch("/api/flotas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre, descripcion: "Flota personalizada", tamano_tablero, barcos })
+  });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  location.reload();
+}
+
+async function eliminarFlota(id) {
+  const res = await fetch(`/api/flotas/${id}`, { method: "DELETE" });
+  if (!res.ok) return alert("Error al eliminar plantilla.");
+  location.reload();
+}
+
+async function reanudarPartida(codigo) {
+  const jugador_id = document.getElementById("jugador-activo").value;
+  const res = await fetch(`/api/salas/${codigo}/reanudar`, { method: "POST" });
+  const data = await res.json();
+  if (!res.ok) return alert(data.error);
+  window.location.href = `/sala/${codigo}?jugador_id=${jugador_id}`;
+}
+
+async function exportarCSV() {
+  const res = await fetch("/api/exportar-csv", { method: "POST" });
+  const data = await res.json();
+  alert(data.mensaje + " (Carpeta: data/output/)");
+}
+</script>
+{% endblock %}
