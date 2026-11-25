@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from app.persistence.database import Base
+from app.models.database import Base
 
 
 class Jugador(Base):

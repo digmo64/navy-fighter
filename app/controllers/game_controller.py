@@ -3,14 +3,14 @@ import random
 import string
 import threading
 import time
-from app.domain.partida import PartidaJuego
-from app.persistence.database import db_session
-from app.persistence.repositories import JugadorRepository, FlotaRepository, PartidaRepository
-from app.persistence.file_manager import FileManager
-from app.services.concurrency import MonitorSalasThread, ExportadorCSVWorker
+from app.models.partida import PartidaJuego
+from app.models.database import db_session
+from app.models.repositories import JugadorRepository, FlotaRepository, PartidaRepository
+from app.models.file_manager import FileManager
+from app.controllers.concurrency import MonitorSalasThread, ExportadorCSVWorker
 
 
-class GameService:
+class GameController:
     def __init__(self):
         self.salas_activas: dict[str, PartidaJuego] = {}
         self._lock = threading.Lock()
@@ -255,4 +255,4 @@ class GameService:
                     )
 
 
-game_service = GameService()
+game_controller = GameController()

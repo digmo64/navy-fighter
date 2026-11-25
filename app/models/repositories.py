@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from sqlalchemy.orm import Session
-from app.persistence.models import Jugador, PlantillaFlota, PartidaDB, MovimientoDB
+from app.models.db_models import Jugador, PlantillaFlota, PartidaDB, MovimientoDB
 
 
 class JugadorRepository:

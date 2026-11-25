@@ -17,5 +17,5 @@ Base = declarative_base()
 
 
 def init_db() -> None:
-    from app.persistence import models  # noqa: F401
+    from app.models import db_models  # noqa: F401
     Base.metadata.create_all(bind=engine)

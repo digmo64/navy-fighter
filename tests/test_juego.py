@@ -1,6 +1,6 @@
 import unittest
-from app.domain.barcos import FlotaFactory
-from app.domain.partida import PartidaJuego
+from app.models.barcos import FlotaFactory
+from app.models.partida import PartidaJuego
 
 
 class TestNavyFighter(unittest.TestCase):

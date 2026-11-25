@@ -1,7 +1,7 @@
 import time
-from app.domain.barcos import FlotaFactory, Barco
-from app.domain.tablero import Tablero
-from app.domain.estados import EstadoPartida, EstadoEsperandoRival
+from app.models.barcos import FlotaFactory, Barco
+from app.models.tablero import Tablero
+from app.models.estados import EstadoPartida, EstadoEsperandoRival
 
 
 class PartidaJuego:
@@ -56,7 +56,7 @@ class PartidaJuego:
         return self.estado.disparar(self, jugador_id, fila, col)
 
     def forzar_victoria_por_abandono(self, ganador_id: int, motivo: str) -> None:
-        from app.domain.estados import EstadoFinalizado
+        from app.models.estados import EstadoFinalizado
         self.ganador_id = ganador_id
         self.registrar_evento(motivo)
         self.cambiar_estado(EstadoFinalizado())

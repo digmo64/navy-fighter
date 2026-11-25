@@ -1,7 +1,7 @@
 import queue
 import threading
 import time
-from app.persistence.file_manager import FileManager
+from app.models.file_manager import FileManager
 
 
 class MonitorSalasThread(threading.Thread):

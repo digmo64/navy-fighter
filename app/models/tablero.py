@@ -1,5 +1,5 @@
 import random
-from app.domain.barcos import Barco
+from app.models.barcos import Barco
 
 
 class Tablero:
